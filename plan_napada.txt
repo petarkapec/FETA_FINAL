@@ -1,0 +1,46 @@
+prijevod: KUPAC | frontend od korisnika
+DJ | frontend od dj-a
+BACK | backend u nodeu
+BAZA | baza logično jebemu tita
+
+TRENUTNO stanje: 
+
+aktivna sesija je ona sa ID-em 3 (hardkodirana u KUPAC i DJ)
+na nju se prijavljuje batica marko@example.com i sifra mu je pass123
+
+
+
+1) ZAPOČNI SESIJU WHILE SESIJA : SHOW SESIJA / ZAVRSI SESIJU
+
+treba napraviti logiku u DJ da ako je mu je trenutno aktivna sesija neka mu se prikaže u SesijaPage u DJ
+a ako ne da miu da onaj izbornik koji si ti prije napravio i mogućnost kreiranja SESIJE
+
+1.1) ENDPOINT za dohvacanje aktivne sesije (vremenski sql upit npr. pokazi sve kaj trenutno traju npr.) 
+1.2) endpoint za kreiranje sesije
+1.3)Ednpoint za završavanje sesije
+
+
+
+2) DOHVACANJE SESIJE PO LOKACIJAMA
+treba napraviti shemu da kada se skenira url (qr kod) treba postojati ruta za lokacije i onda 
+u KUPAC frontend se prikaze isto aktivna SESIJA
+
+
+3) View za pregled lokacija
+3.1 ENDPOINT GETALL LOCATIONS (msm da imamo to već) 3.2) KUPAC mora imati view koja dohvaca sve lokacije i onda se moze ici
+po lokacijama, to je ako qr ne radi
+
+4) View za pregled sesija
+4.1) getall sesije i samo napravi tablicu u reactu -> isto kao i na pdfu
+
+
+5) Dodaj balans po sesiji
+računa on gore u kutu balans al valjalo bi dodati i u bazu stupac zarada il nekaj da je to sigurnije spremljeno
+
+
+6) Filteri u sesijama
+radi kreiranje narudzbi i mjenjanje stanja al mi filteri nisu baš najbolji to popraviti i u KUPAC i u DJ
+
+7) WEBSOCKET
+Oblikovni obrazac  -> Promatrač i subjekt -> notifyClients() kada se izvrši akcija nad narudžbama onda se sve refresha 
+kako treba da je live (to cu ja napravit)
