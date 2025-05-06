@@ -1,0 +1,39 @@
+.header-top-left {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+  }
+  
+  .header-button {
+    background-color: #5BC0BE;
+    color: #0B132B;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s;
+  }
+  
+  .header-button:hover {
+    background-color: #6FFFE9;
+  }
+  
+  .header-button-text {
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 600;
+  }
+  
+  .header-main {
+    width: 100%;
+    padding: 1rem;
+    margin-top: 3rem;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid #3A506B;
+  }
+  
+  .header-title {
+    font-size: 2.25rem; /* text-4xl */
+    font-weight: bold;
+    color: #6FFFE9;
+  }
+  

@@ -1,0 +1,14 @@
+# Obavezno
+node_modules/
+
+# Ako koristiš dotenv za konfiguraciju
+.env
+
+# Ako koristiš npm logove
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ako imaš build folder (npr. za TypeScript)
+dist/
+build/

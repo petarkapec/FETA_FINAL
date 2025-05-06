@@ -1,0 +1,64 @@
+import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import DjPage from "./dj/page"; // Ensure that the file './components/Page.tsx' exists
+import Page from "./page.tsx"
+import Login from "./Login";
+import SesijaPage from "./dj/SesijaPage.tsx";
+import Profil from "./dj/profil";
+import CreateSesija from "./dj/CreateSesija";
+import PreviousSesije from "./dj/PreviousSesije";
+import RequestStatusPage from "./RequestStatusPage.tsx";
+import NicknameForm from "./nickform.tsx";
+import MojeNarudzbe from "./moje_narudzbe.tsx"
+import RegistracijaIzvodjaca from "./dj/RegistracijaIzvođača.tsx";
+import Settings from "./dj/settings.tsx"
+
+function App() {
+  return (
+    <>
+      <Router>
+        <Routes>
+          <Route path="/mjesto/:lokacija_id" element={<Page />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/user" element={<Page />} />
+          <Route path="/sesije/:sesija_id" element={<SesijaPage />} />
+          <Route path="/nickinput" element={<NicknameForm />} />
+          <Route path="/moje-narudzbe" element={<MojeNarudzbe />} />
+          <Route path="/registracija" element={<RegistracijaIzvodjaca />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route
+            path="/narudzba/:narudzba_id"
+            element={<RequestStatusPage />}
+          />
+          <Route
+            path="/profil"
+            element={
+              <ProtectedRoute>
+                <Profil />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-sesija"
+            element={
+              <ProtectedRoute>
+                <CreateSesija />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/previous-sesije"
+            element={
+              <ProtectedRoute>
+                <PreviousSesije />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </>
+  );
+}
+
+export default App;
