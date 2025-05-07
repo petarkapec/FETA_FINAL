@@ -27,7 +27,17 @@ const getLokacijaById = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 }
+
+const getAll = async (req, res) => {
+    try {
+        const lokacije = await lokacijaService.getAll();
+        res.json(lokacije);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 module.exports = {
+    getAll,
     searchLocations,
     getLokacijaById,
 };

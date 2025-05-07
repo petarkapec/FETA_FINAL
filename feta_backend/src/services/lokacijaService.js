@@ -2,6 +2,10 @@ const Lokacija = require('../models/lokacija.js');
 
 const { Op } = require('sequelize');
 
+const getAll = async () => {
+    return await Lokacija.findAll();
+};
+
 async function searchLocations(query) {
     return await Lokacija.findAll({
         where: {
@@ -21,6 +25,7 @@ const getLokacijaById = async (lokacija_id) => {
 };
 
 module.exports = {
+    getAll,
     searchLocations,
     getLokacijaById,
 };
