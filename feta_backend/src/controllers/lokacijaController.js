@@ -18,8 +18,7 @@ async function searchLocations(req, res) {
 const getLokacijaById = async (req, res) => {
     try {
         const { lokacija_id } = req.params;
-        console.log(lokacija_id);
-        console.log("proslo");
+        
         const narudzba = await lokacijaService.getLokacijaById(lokacija_id);
         
         res.json(narudzba);

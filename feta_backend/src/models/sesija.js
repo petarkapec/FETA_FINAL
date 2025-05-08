@@ -45,6 +45,24 @@ const Sesija = sequelize.define('Sesija', {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: 'naziv' // Default status je 'aktivan'
+    },
+    zarada: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0 
+    },
+    list_link: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    list_bool: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "active",
     }
 }, {
     tableName: 'sesija',

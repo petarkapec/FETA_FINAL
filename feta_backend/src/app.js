@@ -1,7 +1,6 @@
 const express = require('express');
 const config = require('./config/env');
 require('dotenv').config();
-console.log(process.env.STRIPE_SECRET);
 const authRoutes = require('./routes/authRoutes');
 const cors = require('cors'); // Uvoz cors middleware-a
 const lokacijaRoutes = require('./routes/lokacijaRoutes');
@@ -14,6 +13,9 @@ const { User } = require('./models');
 const stripeRoutes =  require('./routes/stripeRoutes');
 const app = express();
 const narudzbaService = require("./services/narudzbaService"); // Sequelize model
+// server.js (pri dnu)
+const http = require('http');
+const socket = require('./socket'); // vidi korak 2
 
 
 app.use(cors({
@@ -96,6 +98,9 @@ app.use((req, res, next) => {
 
 
 
+
+
+
 app.use('/', indexRoutes);
 //app.use('/Izvodjaci', authMiddleware)
 
@@ -140,8 +145,12 @@ app.use('/auth', authRoutes);
 
 app.use('/stripe', stripeRoutes);
 
-app.listen(config.port, () => {
-    console.log(`Server running on port ${config.port}`);
+
+const server = http.createServer(app);
+const io = socket.init(server);
+
+server.listen(config.port, () => {
+  console.log(`Server running on port ${config.port}`);
 });
 
 module.exports = app;

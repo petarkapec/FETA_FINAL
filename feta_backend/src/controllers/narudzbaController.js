@@ -1,4 +1,5 @@
 const narudzbaService = require('../services/narudzbaService');
+const sesijaService = require('../services/sesijaService');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET);
 
@@ -92,6 +93,16 @@ const updateNarudzbaStatus = async (req, res) => {
             // Ažuriramo narudžbu sa statusom "allowed" i Stripe payment linkom
             const updatedNarudzba = await narudzbaService.updateNarudzbaStatus(narudzba_id, status, session.id, session.url);
             return res.status(200).json(updatedNarudzba);
+
+        }
+
+        if (status === "played") {
+            // Dohvaćamo narudžbu iz baze
+            const narudzba = await narudzbaService.getNarudzbaById(narudzba_id);
+            const sesija = await sesijaService.getSesijaById(narudzba.sesija_id);
+            sesija.zarada = sesija.zarada + narudzba.donation;
+            
+            await sesijaService.updateSesija(sesija);
         }
 
         // Ako status nije "allowed", samo ažuriramo status
@@ -118,8 +129,6 @@ const getAll = async (req, res) => {
 const getNarudzbaById = async (req, res) => {
     try {
         const { narudzba_id } = req.params;
-        console.log(narudzba_id);
-        console.log("proslo");
         const narudzba = await narudzbaService.getNarudzbaById(narudzba_id);
         
         res.json(narudzba);
@@ -140,10 +149,22 @@ async function getNarudzbeBySesijaId(req, res) {
     }
 }
 
+async function getNarudzbeByKorisnikId(req, res) {
+    const { korisnik_id } = req.params;
+
+    try {
+        const narudzbe = await narudzbaService.getNarudzbeByKorisnikId(korisnik_id);
+        res.status(200).json(narudzbe);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     createNarudzba,
     getAll,
     getNarudzbeBySesijaId,
     getNarudzbaById,
     updateNarudzbaStatus,
+    getNarudzbeByKorisnikId,
 };

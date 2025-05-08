@@ -10,6 +10,33 @@ async function createSesija(dj_id, lokacija_id, minimal_price, comentary = null,
     });
 }
 
+
+async function  finishSesija(sesija_id) {
+    if (!sesija_id) {
+        throw new Error('Sesija not found');
+    }
+    const sesija = await Sesija.findByPk(sesija_id);
+    sesija.status = "expired";
+    
+
+    await sesija.save(); // Sprema samo promijenjena polja
+    return { message: 'Sesija updated successfully' };
+
+    
+}
+
+async function updateSesija(sesija) {
+    if (!sesija) {
+        throw new Error('Sesija not found');
+    }
+
+    await sesija.save(); // Sprema samo promijenjena polja
+    return { message: 'Sesija updated successfully' };
+}
+
+
+
+
 async function deleteSesija(sesija_id) {
     const sesija = await Sesija.findByPk(sesija_id);
     if (!sesija) {
@@ -36,7 +63,8 @@ async function getSesijaByLokacijaId(lokacija_id) {
     try {
         const sesija = await Sesija.findAll({
             where: {
-                lokacija_id: lokacija_id
+                lokacija_id: lokacija_id,
+                status: 'active'
             }
         });
         return sesija;
@@ -59,4 +87,6 @@ module.exports = {
     getSesijeByDjId,
     getSesijaById,
     getSesijaByLokacijaId,
+    updateSesija,
+    finishSesija,
 };

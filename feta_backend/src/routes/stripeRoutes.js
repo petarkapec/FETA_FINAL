@@ -5,13 +5,13 @@ const stripeController = require("../controllers/stripeController");
 router.post("/create-payment-intent", stripeController.createPaymentIntent);
 router.post("/capture-payment", stripeController.capturePayment);
 router.post("/cancel-payment", stripeController.cancelPayment);
-
+const { getIO } = require('../socket'); // Dodano
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 const { Narudzba } = require("../models"); // Sequelize model
 
 router.post("/webhook", express.raw({ type: "application/json" }), async (req, res) => {
-    console.log("prizvan sam");
+    
   const sig = req.headers["stripe-signature"];
   let event;
 
@@ -39,6 +39,7 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req, r
         status: "pending",
       });
 
+      getIO().emit('refresh_data', { type: 'stripe_webhook_narudzba' });
       console.log("Narudžba kreirana nakon uplate.");
     } catch (err) {
       console.error("Greška pri kreiranju narudžbe:", err);
@@ -78,7 +79,7 @@ router.post("/initiate-payment", async (req, res) => {
           },
         ],
         mode: "payment",
-        success_url: `${process.env.FRONTEND_URL}/payment-confirmed?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${process.env.FRONTEND_URL}/payment-confirmed?session_id=${sesija_id}`,
         cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
         payment_intent_data: {
           capture_method: "manual",
@@ -95,6 +96,8 @@ router.post("/initiate-payment", async (req, res) => {
         },
       });
       console.log("Stripe session created:", session.url);
+      console.log(`${process.env.FRONTEND_URL}/payment-confirmed?session_id=${sesija_id}`)
+      getIO().emit('refresh_data', { type: 'stripe_webhook_narudzba' });
   
       return res.json({ checkoutUrl: session.url }); // <--- OVO je ispravno!
     } catch (err) {

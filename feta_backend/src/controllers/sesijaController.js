@@ -3,7 +3,7 @@ const Sesija = require('../models/sesija');
 const { Op } = require('sequelize');
 
 async function createSesija(req, res) {
-    const { dj_id, lokacija_id, minimal_price, comentary, queue_max_song_count } = req.body;
+    const { dj_id, lokacija_id, minimal_price, comentary, queue_max_song_count, list_bool, list_link } = req.body;
 
     // Provjera obaveznih polja
     if (!dj_id || !lokacija_id || minimal_price === undefined) {
@@ -22,7 +22,9 @@ async function createSesija(req, res) {
             comentary,
             queue_max_song_count,
             expiration,
-            status: 'active' // Postavi status na 'active'
+            status: 'active', // Postavi status na 'active',
+            list_link,
+            list_bool: false,
         });
 
         res.status(201).json(novaSesija);
@@ -48,6 +50,25 @@ async function deleteSesija(req, res) {
         res.status(500).json({ message: error.message });
     }
 }
+async function finishSesija(req, res) {
+    const { sesija_id } = req.params;
+
+    if (!sesija_id) {
+        return res.status(400).json({ message: 'sesija_id is required' });  
+    }
+
+    try {
+    const {sesija_id} = req.params
+    sesijaService.finishSesija(sesija_id)
+    res.status(200).json('sesija završena');
+    } catch (error) {
+        if (error.message === 'Sesija not found') {
+            return res.status(404).json({ message: error.message });
+        }
+        res.status(500).json({ message: error.message });
+    }
+}
+
 
 async function getSesijaById(req, res) {
     const { sesija_id } = req.params;
@@ -117,4 +138,5 @@ module.exports = {
     getSesijaById,
     getSesijaByLokacijaId,
     getActiveSesija,
+    finishSesija,    
 };

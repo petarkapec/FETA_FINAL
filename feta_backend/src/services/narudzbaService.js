@@ -19,7 +19,19 @@ const getNarudzbaById = async (narudzba_id) => {
 const getAll = async () => {
     return await IzvodjacMuzike.findAll();
 };
-
+async function getNarudzbeByKorisnikId(korisnik_id) {
+    console.log(korisnik_id);
+    try {
+        const narudzbe = await Narudzba.findAll({
+            where: {
+                user_id: korisnik_id
+            }
+        });
+        return narudzbe;
+    } catch (error) {
+        throw error;
+    }
+}
 
 async function getNarudzbeBySesijaId(sesija_id) {
     console.log(sesija_id);
@@ -65,4 +77,5 @@ module.exports = {
     getNarudzbeBySesijaId,
     getNarudzbaById,
     updateNarudzbaStatus,
+    getNarudzbeByKorisnikId,
 };

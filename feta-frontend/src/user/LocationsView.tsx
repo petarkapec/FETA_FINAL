@@ -6,6 +6,7 @@ import { Search, MapPin } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import type { Lokacija } from "@/types/lokacija"
+import socket from "../utils/socket"
 
 const LocationsView = () => {
   const [locations, setLocations] = useState<Lokacija[]>([])
@@ -15,28 +16,51 @@ const LocationsView = () => {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/lokacije/all`)
+  // Function to fetch locations
+  const fetchLocations = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/lokacije/all`)
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch locations")
-        }
-
-        const data = await response.json()
-        setLocations(data)
-        setFilteredLocations(data)
-      } catch (err) {
-        console.error("Error fetching locations:", err)
-        setError("Failed to load locations. Please try again later.")
-      } finally {
-        setLoading(false)
+      if (!response.ok) {
+        throw new Error("Failed to fetch locations")
       }
-    }
 
+      const data = await response.json()
+      setLocations(data)
+      setFilteredLocations(data)
+      setLoading(false)
+    } catch (err) {
+      console.error("Error fetching locations:", err)
+      setError("Failed to load locations. Please try again later.")
+      setLoading(false)
+    }
+  }
+
+  // Initial data fetch
+  useEffect(() => {
     fetchLocations()
+  }, [])
+
+  // Set up WebSocket for real-time updates
+  useEffect(() => {
+    // Join a general room for location updates
+    socket.emit("join_room", "locations")
+
+    // Listen for data refresh events
+    socket.on("refresh_data", (data) => {
+      console.log("Received refresh data:", data)
+
+      if (data.type === "location_update" || !data.type) {
+        fetchLocations()
+      }
+    })
+
+    return () => {
+      // Leave room and remove listeners when component unmounts
+      socket.emit("leave_room", "locations")
+      socket.off("refresh_data")
+    }
   }, [])
 
   useEffect(() => {
