@@ -1,18 +1,18 @@
 interface ClubProfileProps {
-    nazivKluba?: string;
-    profilnaSlika?: string;
-    instagram?: string;
-  }
-  
-  export const ClubProfile = ({ nazivKluba, profilnaSlika, instagram }: ClubProfileProps) => (
-    <div className="flex flex-col items-center bg-[#1B2B4A] p-6 rounded-2xl shadow-md">
-      <img
-        src={profilnaSlika || "/placeholder.svg"}
-        alt="Club Profile"
-        className="w-48 h-48 rounded-full object-cover border-4 border-[#6FFFE9]"
-      />
-      <h2 className="text-2xl font-bold text-white mt-4">{nazivKluba || "Nepoznat klub"}</h2>
-      {instagram && <p className="text-[#6FFFE9] mt-2">@{instagram}</p>}
-    </div>
-  );
-  
+  nazivKluba?: string
+  profilnaSlika?: string
+  instagram?: string
+  aboutus?: string
+}
+
+export const ClubProfile = ({ nazivKluba, profilnaSlika, instagram }: ClubProfileProps) => (
+  <div className="flex flex-col items-center bg-[#1B2B4A] p-6 rounded-2xl shadow-md">
+    <img
+      src={profilnaSlika || "/placeholder.svg"}
+      alt="Club Profile"
+      className="w-48 h-48 rounded-full object-cover border-4 border-[#6FFFE9]"
+    />
+    <h2 className="text-2xl font-bold text-white mt-4">{nazivKluba || "Unknown club"}</h2>
+    {instagram && <p className="text-[#6FFFE9] mt-2">@{instagram}</p>}
+  </div>
+)

@@ -1,19 +1,17 @@
-import Header from "./header.tsx"; // <- ovdje uvozimo Header
+import Header from "./header.tsx" // <- ovdje uvozimo Header
 import "./styles/userhome.css"
 const UserHome = () => {
-    return (
-      <div className="userhome-container">
-        <Header />
-  
-        <div className="userhome-content">
-          <div className="userhome-box">
-            <p className="userhome-text">
-              Nema aktivnog FETA eventa. :(
-            </p>
-          </div>
+  return (
+    <div className="userhome-container">
+      <Header />
+
+      <div className="userhome-content">
+        <div className="userhome-box">
+          <p className="userhome-text">Nema aktivnog FETA eventa. :(</p>
         </div>
       </div>
-    );
-  };
-  
-  export default UserHome;
+    </div>
+  )
+}
+
+export default UserHome

@@ -1,31 +1,31 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Sesija } from "@/types/sesija";
+"use client"
+
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import type { Sesija } from "@/types/sesija"
 
 const PreviousSesije = () => {
-  const [sesije, setSesije] = useState<Sesija[]>([]);
-  const navigate = useNavigate();
+  const [sesije, setSesije] = useState<Sesija[]>([])
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const djData = localStorage.getItem("dj");
+    const djData = localStorage.getItem("dj")
     if (djData) {
-      const parsedDj = JSON.parse(djData);
-      fetchSesije(parsedDj.dj_id);
+      const parsedDj = JSON.parse(djData)
+      fetchSesije(parsedDj.dj_id)
     }
-  }, []);
+  }, [])
 
   const fetchSesije = async (dj_id: number) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/sesije/sesije-dj/${dj_id}`
-      );
-      const data: Sesija[] = await response.json();
-      setSesije(data);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/sesije/sesije-dj/${dj_id}`)
+      const data: Sesija[] = await response.json()
+      setSesije(data)
     } catch (error) {
-      console.error("Greška pri dohvaćanju sesija:", error);
+      console.error("Greška pri dohvaćanju sesija:", error)
     }
-  };
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0B132B] text-white p-4">
@@ -42,9 +42,7 @@ const PreviousSesije = () => {
       <main className="flex-1 flex flex-col items-center justify-center">
         <div className="w-full max-w-md">
           <div className="bg-[#1C2541] p-6 rounded-2xl shadow-lg">
-            <h3 className="text-2xl font-bold text-[#6FFFE9] mb-6">
-              Prijašnji eventovi
-            </h3>
+            <h3 className="text-2xl font-bold text-[#6FFFE9] mb-6">Prijašnji eventovi</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-white">
                 <thead>
@@ -64,14 +62,10 @@ const PreviousSesije = () => {
                       className="cursor-pointer hover:bg-[#3A506B] transition-colors duration-200"
                     >
                       <td className="py-3 px-4">{request.lokacija_id}</td>
-                      <td className="py-3 px-4">
-                        {new Date(request.expiration).toLocaleString()}
-                      </td>
+                      <td className="py-3 px-4">{new Date(request.expiration).toLocaleString()}</td>
                       <td className="py-3 px-4">{request.minimal_price} €</td>
                       <td className="py-3 px-4">{request.comentary}</td>
-                      <td className="py-3 px-4">
-                        {request.queue_max_song_count}
-                      </td>
+                      <td className="py-3 px-4">{request.queue_max_song_count}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -81,7 +75,7 @@ const PreviousSesije = () => {
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default PreviousSesije;
+export default PreviousSesije

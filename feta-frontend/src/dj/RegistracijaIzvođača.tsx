@@ -1,25 +1,15 @@
-import { useState } from "react";
-import { Menu, Search, LogOut, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandInput, CommandList, CommandItem } from "@/components/ui/command";
+"use client"
 
-const locations = [
-  "Klub H20",
-  "Best Venue Hall",
-  "Vintage Bar",
-  "Aurora club",
-  "Roko",
-  "Ex club",
-];
+import { useState } from "react"
+import { Menu } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+
 
 export default function CreateSession() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [location, setLocation] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false)
   
+
   // Hardkodirane sesije
   const mySessions = [
     { eventName: "Salsa Night", date: "15.03.2023", location: "Aurora Club", earnings: 450 },
@@ -27,8 +17,8 @@ export default function CreateSession() {
     { eventName: "Lollipop Party", date: "05.05.2023", location: "h20 club", earnings: 780 },
     { eventName: "Retro Vibes", date: "18.06.2023", location: "Ex club", earnings: 950 },
     { eventName: "Neon Dreams", date: "30.07.2023", location: "Macarana club", earnings: 1350 },
-  ];
-  
+  ]
+
   return (
     <div className="flex flex-col items-center p-6 min-h-screen bg-[#0B132B] text-white">
       <header className="w-full flex items-center justify-between p-4 bg-[#1C2541] shadow-md">
@@ -45,7 +35,7 @@ export default function CreateSession() {
             </div>
           )}
         </div>
-        
+
         <h1 className="text-4xl font-bold text-[#6FFFE9]">
           FETA <span className="text-[#5BC0BE] text-xl">DJ View</span>
         </h1>
@@ -57,7 +47,7 @@ export default function CreateSession() {
       {/* Sekcija Moje Sesije */}
       <div className="w-full max-w-4xl mt-10">
         <h2 className="text-2xl font-bold text-[#6FFFE9] mb-6">Moje Sesije</h2>
-        
+
         <div className="bg-[#1C2541] shadow-lg border border-[#3A506B] rounded-lg overflow-hidden">
           <table className="w-full">
             <thead className="bg-[#3A506B]">
@@ -82,5 +72,5 @@ export default function CreateSession() {
         </div>
       </div>
     </div>
-  );
+  )
 }

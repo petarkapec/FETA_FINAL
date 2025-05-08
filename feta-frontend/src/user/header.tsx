@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import "./styles/header.css"
 
 const Header = () => {
@@ -14,7 +14,7 @@ const Header = () => {
         <h1 className="header-title">FETA</h1>
       </header>
     </>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 
 import { useState, useEffect } from "react"
@@ -62,7 +60,7 @@ interface ClubProfileProps {
   aboutus?: string
 }
 
-export const ClubProfile = ({ nazivKluba, profilnaSlika, instagram, aboutus }: ClubProfileProps) => (
+export const ClubProfile = ({ nazivKluba, profilnaSlika, instagram}: ClubProfileProps) => (
   <div className="flex flex-col items-center bg-[#1B2B4A] p-6 rounded-2xl shadow-md">
     <img
       src={profilnaSlika || "/placeholder.svg"}
@@ -123,6 +121,7 @@ const SpotifySearch = () => {
   const queryParams = new URLSearchParams(location.search)
   const sesija_id = queryParams.get("sesija_id")
 
+  
   // Function to fetch session data
   const fetchSesija = async () => {
     try {
@@ -292,8 +291,8 @@ const SpotifySearch = () => {
     return null
   }
 
-  // Function to fetch tracks from a Spotify playlist
-  const fetchPlaylistTracks = async (playlistUrl: string, isAllowList: boolean) => {
+  // Fix missing type for fetchPlaylistTracks function parameters
+  const fetchPlaylistTracks = async (playlistUrl: string, isAllowList: boolean): Promise<void> => {
     if (!token) {
       console.error("Spotify token not available")
       return
@@ -353,10 +352,10 @@ const SpotifySearch = () => {
       if (isPlaylistRestricted && sesija && sesija.list_link && playlistTracks.length > 0) {
         if (sesija.list_bool) {
           // Allow list: only show songs that are in the playlist
-          songs = songs.filter((song) => playlistTracks.includes(song.id))
+          songs = songs.filter((song: Song) => playlistTracks.includes(song.id))
         } else {
           // Block list: exclude songs that are in the playlist
-          songs = songs.filter((song) => !playlistTracks.includes(song.id))
+          songs = songs.filter((song: Song) => !playlistTracks.includes(song.id))
         }
       }
 

@@ -1,26 +1,27 @@
 /* Place your existing styles here, or use SCSS for better organization. */
 body {
-    background-color: #0B132B;
-    color: white;
-  }
-  
-  button {
-    background-color: #5BC0BE;
-  }
-  
-  button:hover {
-    background-color: #6FFFE9;
-  }
-  
-  input, textarea {
-    background-color: #0B132B;
-    border: 1px solid #3A506B;
-    color: white;
-  }
-  
-  input::placeholder, textarea::placeholder {
-    color: #3A506B;
-  }
-  
-  /* Add more custom styles */
-  
+  background-color: #0b132b;
+  color: white;
+}
+
+button {
+  background-color: #5bc0be;
+}
+
+button:hover {
+  background-color: #6fffe9;
+}
+
+input,
+textarea {
+  background-color: #0b132b;
+  border: 1px solid #3a506b;
+  color: white;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #3a506b;
+}
+
+/* Add more custom styles */

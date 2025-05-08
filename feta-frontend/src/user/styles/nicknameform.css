@@ -1,56 +1,55 @@
 .nickname-container {
-    min-height: 100vh;
-    width: 100%;
-    background-color: #0B132B;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .nickname-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: transparent;
-    padding: 1rem;
-  }
-  
-  .nickname-title {
-    color: #6FFFE9;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-  
-  .nickname-input {
-    width: 100%;
-    max-width: 300px;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    background-color: #1C2541;
-    border: 1px solid #3A506B;
-    color: #ffffff;
-    margin-bottom: 1rem;
-    outline: none;
-  }
-  
-  .nickname-input::placeholder {
-    color: #9aa5b1;
-  }
-  
-  .nickname-button {
-    background-color: #5BC0BE;
-    color: #0B132B;
-    font-weight: 600;
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.3s;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .nickname-button:hover {
-    background-color: #6FFFE9;
-  }
-  
+  min-height: 100vh;
+  width: 100%;
+  background-color: #0b132b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nickname-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  padding: 1rem;
+}
+
+.nickname-title {
+  color: #6fffe9;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.nickname-input {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background-color: #1c2541;
+  border: 1px solid #3a506b;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  outline: none;
+}
+
+.nickname-input::placeholder {
+  color: #9aa5b1;
+}
+
+.nickname-button {
+  background-color: #5bc0be;
+  color: #0b132b;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.nickname-button:hover {
+  background-color: #6fffe9;
+}

@@ -1,43 +1,38 @@
-import { useState } from "react";
-import { Menu, Search, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandInput, CommandList, CommandItem } from "@/components/ui/command";
-import { Switch } from "@/components/ui/switch"; // Assuming you use some library for switch
+"use client"
 
-const locations = [
-  "Klub H20",
-  "Best Venue Hall",
-  "Vintage Bar",
-  "Aurora club",
-  "Roko",
-  "Ex club",
-];
+import { useState } from "react"
+import { Menu, Search, Settings } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent } from "@/components/ui/card"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandInput, CommandList, CommandItem } from "@/components/ui/command"
+import { Switch } from "@/components/ui/switch" // Assuming you use some library for switch
+
+const locations = ["Klub H20", "Best Venue Hall", "Vintage Bar", "Aurora club", "Roko", "Ex club"]
 
 export default function SettingsPage() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [location, setLocation] = useState("");
-  const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
-  const [isLocationDefault, setIsLocationDefault] = useState(false);
-  const [isPriceDefault, setIsPriceDefault] = useState(true);
-  const [isDescriptionDefault, setIsDescriptionDefault] = useState(true);
-  const [maxSongs, setMaxSongs] = useState("∞");
-  const [isSpotifyEnabled, setIsSpotifyEnabled] = useState(false);
-  const [isAllowList, setIsAllowList] = useState(true);
-  const [blockList, setBlockList] = useState(["Lady Gaga - Bad Romance", "Sinan Sakić - trezan"]);
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [location, setLocation] = useState("")
+  const [price, setPrice] = useState("")
+  const [description, setDescription] = useState("")
+  const [isLocationDefault, setIsLocationDefault] = useState(false)
+  const [isPriceDefault, setIsPriceDefault] = useState(true)
+  const [isDescriptionDefault, setIsDescriptionDefault] = useState(true)
+  const [maxSongs, setMaxSongs] = useState("∞")
+  const [isSpotifyEnabled, setIsSpotifyEnabled] = useState(false)
+  const [isAllowList, setIsAllowList] = useState(true)
+  const [blockList, setBlockList] = useState(["Lady Gaga - Bad Romance", "Sinan Sakić - trezan"])
 
-  const toggleBlockList = (song) => {
+  const toggleBlockList = (song: string) => {
     setBlockList((prev) => {
       if (prev.includes(song)) {
-        return prev.filter(item => item !== song);
+        return prev.filter((item) => item !== song)
       }
-      return [...prev, song];
-    });
-  };
+      return [...prev, song]
+    })
+  }
 
   return (
     <div className="flex flex-col items-center p-6 min-h-screen bg-[#0B132B] text-white">
@@ -49,7 +44,7 @@ export default function SettingsPage() {
           {menuOpen && (
             <div className="absolute left-0 mt-2 w-40 bg-[#1C2541] shadow-lg rounded-md p-2 border border-[#3A506B]">
               <ul>
-                <li className="p-2 cursor-pointer hover:bg-[#5BC0BE] text-white">Profil</li>
+                <li className="p-2 cursor-pointer hover:bg-[#5BC প্রেমে] text-white">Profil</li>
                 <li className="p-2 cursor-pointer hover:bg-[#5BC0BE] text-white">Moje Sesije</li>
               </ul>
             </div>
@@ -57,7 +52,8 @@ export default function SettingsPage() {
         </div>
         <h1 className="text-4xl font-bold text-[#6FFFE9]">
           FETA <span className="text-[#5BC0BE] text-xl">DJ View</span>
-        </h1>        <Settings className="w-6 h-6 text-[#6FFFE9] cursor-pointer" />
+        </h1>{" "}
+        <Settings className="w-6 h-6 text-[#6FFFE9] cursor-pointer" />
       </header>
 
       <div>
@@ -66,7 +62,10 @@ export default function SettingsPage() {
             <span className="text-white">Lokacija Eventa</span>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full flex justify-between bg-[#3A506B] border border-[#5BC0BE] text-white">
+                <Button
+                  variant="outline"
+                  className="w-full flex justify-between bg-[#3A506B] border border-[#5BC0BE] text-white"
+                >
                   {location || "Odaberi mjesto"} <Search className="w-4 h-4 text-[#6FFFE9]" />
                 </Button>
               </PopoverTrigger>
@@ -75,7 +74,11 @@ export default function SettingsPage() {
                   <CommandInput placeholder="Pretraži mjesto..." className="text-white bg-[#3A506B]" />
                   <CommandList>
                     {locations.map((loc) => (
-                      <CommandItem key={loc} onSelect={() => setLocation(loc)} className="cursor-pointer hover:bg-[#5BC0BE] text-white">
+                      <CommandItem
+                        key={loc}
+                        onSelect={() => setLocation(loc)}
+                        className="cursor-pointer hover:bg-[#5BC0BE] text-white"
+                      >
                         {loc}
                       </CommandItem>
                     ))}
@@ -116,7 +119,10 @@ export default function SettingsPage() {
               <div className="flex gap-4">
                 <div className="flex items-center gap-2">
                   <span className="text-white">Mjesto</span>
-                  <Switch checked={isLocationDefault} onCheckedChange={() => setIsLocationDefault(!isLocationDefault)} />
+                  <Switch
+                    checked={isLocationDefault}
+                    onCheckedChange={() => setIsLocationDefault(!isLocationDefault)}
+                  />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-white">Cijena</span>
@@ -124,7 +130,10 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-white">Opis</span>
-                  <Switch checked={isDescriptionDefault} onCheckedChange={() => setIsDescriptionDefault(!isDescriptionDefault)} />
+                  <Switch
+                    checked={isDescriptionDefault}
+                    onCheckedChange={() => setIsDescriptionDefault(!isDescriptionDefault)}
+                  />
                 </div>
               </div>
             </div>
@@ -135,7 +144,11 @@ export default function SettingsPage() {
                 <span className="text-[#6FFFE9]">Spotify playlist ograničenja</span>
               </div>
               {!isSpotifyEnabled && (
-                <span className="text-white">Možeš dozvoliti samo određene pjesme na eventu kopirajući svoju spotify playlistu u box ili možeš postaviti listu zabranjenih pjesama tokom svog eventa, izbor je tvoj! Samo označi želiš li block ili allow listu te slobodno uređuj block listu sa našim pretraživačem!</span>
+                <span className="text-white">
+                  Možeš dozvoliti samo određene pjesme na eventu kopirajući svoju spotify playlistu u box ili možeš
+                  postaviti listu zabranjenih pjesama tokom svog eventa, izbor je tvoj! Samo označi želiš li block ili
+                  allow listu te slobodno uređuj block listu sa našim pretraživačem!
+                </span>
               )}
 
               {isSpotifyEnabled && (
@@ -156,9 +169,14 @@ export default function SettingsPage() {
                   <h3 className="text-[#6FFFE9]">Block List</h3>
                   <div className="space-y-2">
                     {blockList.map((song, index) => (
-                      <div key={index} className="flex items-center justify-between bg-[#1C2541] border border-[#3A506B] p-2 rounded-md">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-[#1C2541] border border-[#3A506B] p-2 rounded-md"
+                      >
                         <span className="text-white">{song}</span>
-                        <Button variant="outline" onClick={() => toggleBlockList(song)} className="text-[#5BC0BE]">Remove</Button>
+                        <Button variant="outline" onClick={() => toggleBlockList(song)} className="text-[#5BC0BE]">
+                          Remove
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -167,7 +185,9 @@ export default function SettingsPage() {
                       placeholder="Search to add song"
                       className="w-full bg-[#3A506B] border border-[#5BC0BE] text-white"
                     />
-                    <Button variant="outline" onClick={() => toggleBlockList("New Song")} className="text-[#5BC0BE]">Add Song</Button>
+                    <Button variant="outline" onClick={() => toggleBlockList("New Song")} className="text-[#5BC0BE]">
+                      Add Song
+                    </Button>
                   </div>
                 </div>
               )}
@@ -183,11 +203,9 @@ export default function SettingsPage() {
           <Button variant="outline" className="w-full bg-[#3A506B] border border-[#5BC0BE] text-white">
             Natrag
           </Button>
-          <Button className="w-full bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B]">
-            Spremi
-          </Button>
+          <Button className="w-full bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B]">Spremi</Button>
         </div>
       </div>
     </div>
-  );
+  )
 }

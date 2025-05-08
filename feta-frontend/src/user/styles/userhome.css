@@ -1,38 +1,39 @@
 /* Popravljamo cijelu pozadinu i širinu */
-body, html, #root {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: #0B132B;
-  }
-  
-  .userhome-container {
-    min-height: 100vh;
-    width: 100%;
-    background-color: #0B132B;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-  
-  .userhome-content {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .userhome-box {
-    padding: 1.5rem;
-    background-color: #1C2541;
-    border-radius: 0.5rem;
-    text-align: center;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
-  }
-  
-  .userhome-text {
-    color: white;
-    font-size: 1.125rem;
-    font-weight: 600;
-  }
-  
+body,
+html,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #0b132b;
+}
+
+.userhome-container {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #0b132b;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.userhome-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.userhome-box {
+  padding: 1.5rem;
+  background-color: #1c2541;
+  border-radius: 0.5rem;
+  text-align: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.userhome-text {
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 600;
+}

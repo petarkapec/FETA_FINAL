@@ -38,9 +38,10 @@ export const SongRequestDialog = ({
 }: SongRequestDialogProps) => {
   const maxCijena = minCijena * 25
   const [showConfirmation, setShowConfirmation] = useState(false)
-  const [poslanaNarudzba, setPoslanaNarudzba] = useState<any>(null)
+  const [poslanaNarudzba] = useState<any>(null)
 
-  const handleInitiatePayment = async () => {
+  // Fix missing type for handleInitiatePayment function
+  const handleInitiatePayment = async (): Promise<void> => {
     if (!selectedSong || !donacija || Number(donacija) < minCijena) return
 
     const userId = localStorage.getItem("user_id")
