@@ -15,8 +15,26 @@ import { fetchToken, searchSongs } from "../../utils/spotifyApi.ts"
 import type { DJ } from "../../types/dj"
 import type { Lokacija } from "../../types/lokacija"
 import { Button } from "@/components/ui/button"
-import { Headphones, MapPin, ArrowLeft, AlertCircle, Music, Clock, DollarSign, AlertTriangle } from "lucide-react"
+import {
+  Headphones,
+  MapPin,
+  ArrowLeft,
+  AlertCircle,
+  Music,
+  Clock,
+  DollarSign,
+  AlertTriangle,
+  Filter,
+  ArrowUpDown,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import socket from "../../utils/socket"
 
 interface DJProfileProps {
@@ -51,7 +69,7 @@ export const ClubProfile = ({ nazivKluba, profilnaSlika, instagram, aboutus }: C
       alt="Club Profile"
       className="w-48 h-48 rounded-full object-cover border-4 border-[#6FFFE9]"
     />
-    <h2 className="text-2xl font-bold text-white mt-4">{nazivKluba || "Nepoznat klub"}</h2>
+    <h2 className="text-2xl font-bold text-white mt-4">{nazivKluba || "Unknown club"}</h2>
     {instagram && <p className="text-[#6FFFE9] mt-2">@{instagram}</p>}
   </div>
 )
@@ -80,7 +98,6 @@ const SpotifySearch = () => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [nadimak, setNadimak] = useState("")
   const [donacija, setDonacija] = useState("")
   const [komentar, setKomentar] = useState("")
   const [dj, setDj] = useState<DJ | null>(null)
@@ -98,6 +115,8 @@ const SpotifySearch = () => {
   const [sessionExpired, setSessionExpired] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<"time" | "price">("time") // Default sort by time
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc") // Newest first by default
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -121,7 +140,7 @@ const SpotifySearch = () => {
 
       const data: Sesija = await response.json()
 
-      // Provjera je li sesija istekla
+      // Check if session is expired
       if (data.status === "expired") {
         console.log("Session is expired:", data)
         setSessionExpired(true)
@@ -219,7 +238,7 @@ const SpotifySearch = () => {
     socket.on("refresh_data", (data) => {
       console.log("Received refresh data:", data)
 
-      // Osvježi sve podatke bez obzira na tip poruke
+      // Refresh all data regardless of message type
       fetchUserOrders()
       fetchSesija()
     })
@@ -363,40 +382,17 @@ const SpotifySearch = () => {
     navigate("/locations")
   }
 
-  const handleSubmitRequest = async () => {
-    if (!selectedSong || !nadimak || !donacija || !sesija) return
-
-    const requestData = {
-      sesija_id: sesija.sesija_id,
-      korisnik: nadimak,
-      comment: komentar,
-      donation: Number.parseFloat(donacija),
-      nickname: nadimak,
-      song_id: selectedSong.id,
-      song_name: selectedSong.name,
-      song_artist: selectedSong.artist,
-      song_album_art: selectedSong.albumArt,
-      status: "pending",
+  // Sort user orders based on current sort settings
+  const sortedUserOrders = [...userOrders].sort((a, b) => {
+    if (sortOrder === "time") {
+      const timeA = new Date(a.created_at).getTime()
+      const timeB = new Date(b.created_at).getTime()
+      return sortDirection === "asc" ? timeA - timeB : timeB - timeA
+    } else {
+      // Sort by price
+      return sortDirection === "asc" ? a.donation - b.donation : b.donation - a.donation
     }
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/narudzbe/stvori`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        navigate(`/narudzba/${data.narudzba_id}`)
-      } else {
-        throw new Error("Error submitting request")
-      }
-    } catch (error) {
-      console.error("Error submitting request:", error)
-      alert("Error submitting request. Please try again.")
-    }
-  }
+  })
 
   // Helper function to format time ago
   const formatTimeAgo = (dateString: string): string => {
@@ -474,7 +470,7 @@ const SpotifySearch = () => {
     )
   }
 
-  // Prikaži poseban UI ako je sesija istekla
+  // Show special UI if session is expired
   if (sessionExpired) {
     return (
       <div className="flex flex-col min-h-screen bg-[#0B132B] text-white p-4">
@@ -542,7 +538,44 @@ const SpotifySearch = () => {
       </Button>
 
       <div className="w-full bg-[#1C2541] rounded-xl p-6 shadow-lg">
-        <h2 className="text-2xl font-bold text-[#6FFFE9] mb-6">My Song Requests</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-[#6FFFE9]">My Song Requests</h2>
+
+          <div className="flex items-center gap-2">
+            {/* Sort dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="border-[#3A506B] text-[#5BC0BE]">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Sort by: {sortOrder === "time" ? "Time" : "Price"}
+                  <ArrowUpDown className="h-4 w-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-[#1C2541] border-[#3A506B]">
+                <DropdownMenuRadioGroup
+                  value={sortOrder}
+                  onValueChange={(value) => setSortOrder(value as "time" | "price")}
+                >
+                  <DropdownMenuRadioItem value="time" className="text-white hover:bg-[#3A506B]">
+                    Time
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="price" className="text-white hover:bg-[#3A506B]">
+                    Price
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Direction toggle */}
+            <Button
+              variant="outline"
+              onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")}
+              className="border-[#3A506B] text-[#5BC0BE]"
+            >
+              {sortDirection === "asc" ? "Oldest First" : "Newest First"}
+            </Button>
+          </div>
+        </div>
 
         {ordersLoading ? (
           <div className="flex justify-center py-8">
@@ -552,7 +585,7 @@ const SpotifySearch = () => {
           <p className="text-center py-8 text-[#5BC0BE]">You haven't made any song requests yet.</p>
         ) : (
           <div className="space-y-4">
-            {userOrders.map((order) => (
+            {sortedUserOrders.map((order) => (
               <div key={order.narudzba_id} className="bg-[#0B132B] rounded-lg p-4 shadow border border-[#3A506B]">
                 <div className="flex items-start gap-3">
                   <img
@@ -649,7 +682,7 @@ const SpotifySearch = () => {
         </div>
         <div className="text-center">
           <h1 className="text-4xl font-bold text-[#6FFFE9]">FETA</h1>
-          <h2 className="mt-2">Pozdrav, {nickname} ovdje možete naručiti pjesmu!</h2>
+          <h2 className="mt-2">Hello, {nickname}! Request your favorite songs here!</h2>
           <div className="mt-2 flex justify-center gap-4">
             <Button onClick={handleBackToLocations} className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white">
               <ArrowLeft className="w-4 h-4 mr-2" />

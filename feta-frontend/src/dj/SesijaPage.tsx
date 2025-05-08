@@ -2,15 +2,23 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { Clock, DollarSign, CheckCircle, XCircle } from "lucide-react"
+import { Clock, DollarSign, CheckCircle, XCircle, Filter, ArrowUpDown, Music } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import socket from "../utils/socket"
 
-// Konstante za konfiguraciju
-const SOCKET_REFRESH_DELAY = 4000 // 2 sekunde delay nakon socket poruke
-const AUTO_REFRESH_INTERVAL = 30000 // 30 sekundi za automatsko osvježavanje
+// Configuration constants
+const SOCKET_REFRESH_DELAY = 4000 // 4 seconds delay after socket message
+const AUTO_REFRESH_INTERVAL = 30000 // 30 seconds for auto refresh
 
-interface Narudzba {
+interface Order {
   narudzba_id: number
   sesija_id: number
   korisnik: string
@@ -25,7 +33,7 @@ interface Narudzba {
   created_at: string
 }
 
-interface Sesija {
+interface Session {
   sesija_id: number
   dj_id: number
   lokacija_id: number
@@ -34,13 +42,16 @@ interface Sesija {
   comentary: string
   queue_max_song_count: number
   naziv: string
+  status: "active" | "expired"
 }
 
 export default function SesijaPage() {
   const { sesija_id } = useParams<{ sesija_id: string }>()
-  const [sesija, setSesija] = useState<Sesija | null>(null)
-  const [requests, setRequests] = useState<Narudzba[]>([])
+  const [session, setSession] = useState<Session | null>(null)
+  const [requests, setRequests] = useState<Order[]>([])
   const [activeFilter, setActiveFilter] = useState<"all" | "pending" | "allowed" | "played" | "rejected">("all")
+  const [sortOrder, setSortOrder] = useState<"time" | "price">("time")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc") // newest first by default
   const [totalEarnings, setTotalEarnings] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +60,7 @@ export default function SesijaPage() {
   const navigate = useNavigate()
 
   // Function to fetch session data
-  const fetchSesija = async () => {
+  const fetchSession = async () => {
     try {
       // Check if DJ is logged in
       const token = localStorage.getItem("token")
@@ -68,8 +79,8 @@ export default function SesijaPage() {
         throw new Error("Failed to fetch session")
       }
 
-      const data: Sesija = await response.json()
-      setSesija(data)
+      const data: Session = await response.json()
+      setSession(data)
       setLoading(false)
     } catch (error) {
       console.error("Error fetching session:", error)
@@ -80,19 +91,19 @@ export default function SesijaPage() {
 
   // Function to fetch orders for the session
   const fetchRequests = async () => {
-    if (!sesija) return
+    if (!session) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/narudzbe/posesiji/${sesija.sesija_id}`)
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/narudzbe/posesiji/${session.sesija_id}`)
       if (!response.ok) {
         throw new Error("Failed to fetch orders")
       }
 
-      const data: Narudzba[] = await response.json()
+      const data: Order[] = await response.json()
       setRequests(data)
       setLastRefresh(new Date())
 
-      // Calculate total earnings from paid requests
+      // Calculate total earnings from played requests
       const earnings = data.filter((req) => req.status === "played").reduce((sum, req) => sum + req.donation, 0)
       setTotalEarnings(earnings)
     } catch (error) {
@@ -102,26 +113,26 @@ export default function SesijaPage() {
 
   // Function to refresh all data
   const refreshAllData = () => {
-    fetchSesija()
+    fetchSession()
     fetchRequests()
   }
 
   // Initial data fetch
   useEffect(() => {
-    fetchSesija()
+    fetchSession()
   }, [sesija_id, navigate])
 
   // Fetch orders when session data is available
   useEffect(() => {
-    if (sesija) {
+    if (session) {
       fetchRequests()
     }
-  }, [sesija])
+  }, [session])
 
   // Set up periodic refresh
   useEffect(() => {
     // Only set up the timer if we have a session
-    if (sesija) {
+    if (session) {
       // Clear any existing timer
       if (refreshTimerRef.current) {
         clearInterval(refreshTimerRef.current)
@@ -129,7 +140,7 @@ export default function SesijaPage() {
 
       // Set up new timer
       refreshTimerRef.current = setInterval(() => {
-        console.log(`Automatsko osvježavanje podataka (zadnje osvježavanje: ${formatTimeAgo(lastRefresh)})`)
+        console.log(`Auto refreshing data (last refresh: ${formatTimeAgo(lastRefresh)})`)
         refreshAllData()
       }, AUTO_REFRESH_INTERVAL)
     }
@@ -140,34 +151,34 @@ export default function SesijaPage() {
         clearInterval(refreshTimerRef.current)
       }
     }
-  }, [sesija, lastRefresh])
+  }, [session, lastRefresh])
 
   // Set up WebSocket for real-time updates
   useEffect(() => {
     // Join room for this specific session
-    if (sesija) {
-      socket.emit("join_room", `session_${sesija.sesija_id}`)
+    if (session) {
+      socket.emit("join_room", `session_${session.sesija_id}`)
     }
 
     // Listen for data refresh events
     socket.on("refresh_data", (data) => {
       console.log("Received refresh data:", data)
 
-      // Posebno naglašavamo osvježavanje narudžbi za određene tipove poruka
+      // Specifically refresh orders for certain message types
       if (
         data.type === "stripe_webhook_narudzba" ||
         data.type === "narudzba_status_azuriran" ||
         data.type === "stripe_capture"
       ) {
-        console.log(`Osvježavam narudžbe zbog važne promjene: ${data.type} (s odgodom od ${SOCKET_REFRESH_DELAY}ms)`)
+        console.log(`Refreshing orders due to important change: ${data.type} (with delay of ${SOCKET_REFRESH_DELAY}ms)`)
 
-        // Dodajemo timeout da osiguramo da su podaci na serveru ažurirani
+        // Add timeout to ensure server data is updated
         setTimeout(() => {
           fetchRequests()
         }, SOCKET_REFRESH_DELAY)
       }
 
-      // Za sve tipove poruka, osvježavamo sve podatke s odgodom
+      // For all message types, refresh all data with delay
       setTimeout(() => {
         refreshAllData()
       }, SOCKET_REFRESH_DELAY)
@@ -175,12 +186,12 @@ export default function SesijaPage() {
 
     return () => {
       // Leave room and remove listeners when component unmounts
-      if (sesija) {
-        socket.emit("leave_room", `session_${sesija.sesija_id}`)
+      if (session) {
+        socket.emit("leave_room", `session_${session.sesija_id}`)
       }
       socket.off("refresh_data")
     }
-  }, [sesija])
+  }, [session])
 
   const filteredRequests = activeFilter === "all" ? requests : requests.filter((req) => req.status === activeFilter)
 
@@ -195,10 +206,10 @@ export default function SesijaPage() {
       })
 
       if (response.ok) {
-        // Optimistički ažuriramo UI
+        // Optimistically update UI
         setRequests(requests.map((req) => (req.narudzba_id === id ? { ...req, status: newStatus } : req)))
 
-        // Update total earnings if status changed to/from paid/played
+        // Update total earnings if status changed to/from played/rejected
         if (newStatus === "played" || newStatus === "rejected") {
           const updatedEarnings = requests
             .filter((req) => (req.narudzba_id === id ? newStatus === "played" : req.status === "played"))
@@ -206,7 +217,7 @@ export default function SesijaPage() {
           setTotalEarnings(updatedEarnings)
         }
 
-        // Dodajemo timeout da osvježimo podatke nakon što server obradi promjenu
+        // Add timeout to refresh data after server processes the change
         setTimeout(() => {
           fetchRequests()
         }, SOCKET_REFRESH_DELAY)
@@ -232,10 +243,16 @@ export default function SesijaPage() {
     }
   }
 
-  // Sort requests by donation (highest first) and time (newest first)
+  // Sort requests based on current sort settings
   const sortedRequests = [...filteredRequests].sort((a, b) => {
-    if (a.donation !== b.donation) return b.donation - a.donation
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    if (sortOrder === "time") {
+      const timeA = new Date(a.created_at).getTime()
+      const timeB = new Date(b.created_at).getTime()
+      return sortDirection === "asc" ? timeA - timeB : timeB - timeA
+    } else {
+      // Sort by price
+      return sortDirection === "asc" ? a.donation - b.donation : b.donation - a.donation
+    }
   })
 
   if (loading) {
@@ -246,7 +263,7 @@ export default function SesijaPage() {
     )
   }
 
-  if (error || !sesija) {
+  if (error || !session) {
     return (
       <div className="flex flex-col min-h-screen bg-[#0B132B] text-white p-4">
         <header className="p-4 flex justify-between items-center border-b border-[#3A506B]">
@@ -278,15 +295,15 @@ export default function SesijaPage() {
         <Button onClick={() => navigate("/user_home")} className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white">
           Back
         </Button>
-        <h1 className="text-2xl font-bold text-[#6FFFE9]">{sesija.naziv}</h1>
+        <h1 className="text-2xl font-bold text-[#6FFFE9]">{session.naziv}</h1>
         <div className="flex items-center gap-2">
           <Button className="bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-2 px-4 rounded-lg">
-            Balans: {totalEarnings.toFixed(2)} €
+            Balance: {totalEarnings.toFixed(2)} €
           </Button>
           <Button
             onClick={refreshAllData}
             className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white"
-            title={`Zadnje osvježavanje: ${formatTimeAgo(lastRefresh)}`}
+            title={`Last refresh: ${formatTimeAgo(lastRefresh)}`}
           >
             <Clock className="h-4 w-4" />
           </Button>
@@ -297,16 +314,16 @@ export default function SesijaPage() {
       <div className="p-4 bg-[#1C2541] border-b border-[#3A506B]">
         <div className="max-w-2xl mx-auto space-y-1">
           <p>
-            <strong>Expires:</strong> {new Date(sesija.expiration).toLocaleString()}
+            <strong>Expires:</strong> {new Date(session.expiration).toLocaleString()}
           </p>
           <p>
-            <strong>Minimum price:</strong> {sesija.minimal_price} €
+            <strong>Minimum price:</strong> {session.minimal_price} €
           </p>
           <p>
-            <strong>Comment:</strong> {sesija.comentary}
+            <strong>Comment:</strong> {session.comentary}
           </p>
           <p>
-            <strong>Maximum songs in queue:</strong> {sesija.queue_max_song_count}
+            <strong>Maximum songs in queue:</strong> {session.queue_max_song_count}
           </p>
           <p className="text-xs text-[#5BC0BE]">
             Last refresh: {formatTimeAgo(lastRefresh)} (auto-refreshes every {AUTO_REFRESH_INTERVAL / 1000} seconds)
@@ -317,24 +334,61 @@ export default function SesijaPage() {
       {/* Filters for requests - centered */}
       <div className="p-4 flex justify-center space-x-2 border-b border-[#3A506B]">
         <div className="flex flex-wrap justify-center gap-2">
-          {(["all", "pending", "allowed", "played", "rejected"] as const).map((filter) => (
-            <Button
-              key={filter}
-              variant={activeFilter === filter ? "default" : "outline"}
-              onClick={() => setActiveFilter(filter)}
-              className={activeFilter === filter ? "bg-[#5BC0BE] text-[#0B132B]" : "border-[#3A506B] text-[#5BC0BE]"}
-            >
-              {filter === "all"
-                ? "All"
-                : filter === "pending"
-                  ? "Pending"
-                  : filter === "allowed"
-                    ? "Allowed"
-                    : filter === "played"
-                      ? "Played"
-                      : "Rejected"}
-            </Button>
-          ))}
+          {/* Status filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-[#5BC0BE]">Status:</span>
+            {(["all", "pending", "allowed", "played", "rejected"] as const).map((filter) => (
+              <Button
+                key={filter}
+                variant={activeFilter === filter ? "default" : "outline"}
+                onClick={() => setActiveFilter(filter)}
+                className={activeFilter === filter ? "bg-[#5BC0BE] text-[#0B132B]" : "border-[#3A506B] text-[#5BC0BE]"}
+              >
+                {filter === "all"
+                  ? "All"
+                  : filter === "pending"
+                    ? "Pending"
+                    : filter === "allowed"
+                      ? "Allowed"
+                      : filter === "played"
+                        ? "Played"
+                        : "Rejected"}
+              </Button>
+            ))}
+          </div>
+
+          {/* Sort dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="border-[#3A506B] text-[#5BC0BE] ml-2">
+                <Filter className="h-4 w-4 mr-2" />
+                Sort by: {sortOrder === "time" ? "Time" : "Price"}
+                <ArrowUpDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-[#1C2541] border-[#3A506B]">
+              <DropdownMenuRadioGroup
+                value={sortOrder}
+                onValueChange={(value) => setSortOrder(value as "time" | "price")}
+              >
+                <DropdownMenuRadioItem value="time" className="text-white hover:bg-[#3A506B]">
+                  Time
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="price" className="text-white hover:bg-[#3A506B]">
+                  Price
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Direction toggle */}
+          <Button
+            variant="outline"
+            onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")}
+            className="border-[#3A506B] text-[#5BC0BE]"
+          >
+            {sortDirection === "asc" ? "Ascending" : "Descending"}
+          </Button>
         </div>
       </div>
 
@@ -363,11 +417,28 @@ export default function SesijaPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span>{request.nickname}</span>
+                        <Badge
+                          className={
+                            request.status === "pending"
+                              ? "bg-yellow-500 text-black"
+                              : request.status === "allowed"
+                                ? "bg-blue-500"
+                                : request.status === "played"
+                                  ? "bg-green-500"
+                                  : "bg-red-500"
+                          }
+                        >
+                          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                        </Badge>
                       </div>
                     </div>
 
                     <div className="mt-2 space-y-1">
+                      <div className="flex items-center text-sm">
+                        <Music className="h-4 w-4 mr-1 text-[#5BC0BE]" />
+                        <span>{request.nickname}</span>
+                      </div>
+
                       <div className="flex items-center text-sm">
                         <DollarSign className="h-4 w-4 mr-1 text-[#5BC0BE]" />
                         <span>{request.donation.toFixed(2)} €</span>
@@ -429,7 +500,7 @@ export default function SesijaPage() {
         <Button
           onClick={async () => {
             try {
-              const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/sesije/finish/${sesija.sesija_id}`, {
+              const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/sesije/finish/${session.sesija_id}`, {
                 method: "POST",
               })
 

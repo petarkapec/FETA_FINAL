@@ -1,15 +1,15 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from "react-router-dom"
 
 const PrivateRoute = () => {
-  const token = localStorage.getItem('tokenuser');
+  const token = localStorage.getItem("tokenuser")
 
-  // Ako nema tokena, preusmjeri na /nickform
+  // If no user token, redirect to nickname form
   if (!token) {
-    return <Navigate to="/nickform" replace />;
+    return <Navigate to="/nickform" replace />
   }
 
-  // Ako postoji token, renderiraj sljedeći sadržaj rute
-  return <Outlet />;
-};
+  // If authenticated as user, render the protected route
+  return <Outlet />
+}
 
-export default PrivateRoute;
+export default PrivateRoute

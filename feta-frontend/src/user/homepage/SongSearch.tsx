@@ -1,14 +1,18 @@
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { Song } from "../../types/song";
+"use client"
+
+import type React from "react"
+
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Search, Music, User } from "lucide-react"
+import type { Song } from "../../types/song"
 
 interface SongSearchProps {
-  query: string;
-  setQuery: React.Dispatch<React.SetStateAction<string>>;
-  results: Song[];
-  handleQueryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSongSelect: (song: Song) => void;
+  query: string
+  setQuery: React.Dispatch<React.SetStateAction<string>>
+  results: Song[]
+  handleQueryChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleSongSelect: (song: Song) => void
 }
 
 export const SongSearch = ({ query, setQuery, results, handleQueryChange, handleSongSelect }: SongSearchProps) => (
@@ -29,7 +33,10 @@ export const SongSearch = ({ query, setQuery, results, handleQueryChange, handle
 
       {results.length > 0 && (
         <div className="space-y-2 mb-8">
-          <h2 className="text-xl font-semibold text-[#5BC0BE]">Results</h2>
+          <h2 className="text-xl font-semibold text-[#5BC0BE] flex items-center gap-2">
+            <Music className="h-5 w-5" />
+            Results
+          </h2>
           <ul className="space-y-2">
             {results.map((song) => (
               <li
@@ -37,10 +44,13 @@ export const SongSearch = ({ query, setQuery, results, handleQueryChange, handle
                 onClick={() => handleSongSelect(song)}
                 className="flex items-center p-3 bg-[#1C2541] rounded-md cursor-pointer hover:bg-[#3A506B] transition-colors"
               >
-                <img src={song.albumArt} alt={song.name} className="w-10 h-10 mr-3 rounded" />
+                <img src={song.albumArt || "/placeholder.svg"} alt={song.name} className="w-10 h-10 mr-3 rounded" />
                 <div>
                   <p className="font-medium">{song.name}</p>
-                  <p className="text-sm text-[#5BC0BE]">{song.artist}</p>
+                  <p className="text-sm text-[#5BC0BE] flex items-center gap-1">
+                    <User className="h-3 w-3" />
+                    {song.artist}
+                  </p>
                 </div>
               </li>
             ))}
@@ -49,4 +59,4 @@ export const SongSearch = ({ query, setQuery, results, handleQueryChange, handle
       )}
     </div>
   </main>
-);
+)

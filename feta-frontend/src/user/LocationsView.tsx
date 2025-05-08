@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, MapPin } from "lucide-react"
+import { Search, MapPin, Music, Calendar } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import type { Lokacija } from "@/types/lokacija"
@@ -153,9 +153,13 @@ const LocationsView = () => {
                     <MapPin className="h-4 w-4 mr-1" />
                     <span className="text-sm">{location.adresa || "Address not available"}</span>
                   </div>
-                  <Button className="w-full bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium mt-2">
-                    View Events
-                  </Button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-[#5BC0BE]">
+                      <Music className="h-4 w-4 mr-1" />
+                      <Calendar className="h-4 w-4 ml-2" />
+                    </div>
+                    <Button className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium">View Events</Button>
+                  </div>
                 </div>
               </div>
             ))}
