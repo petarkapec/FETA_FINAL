@@ -20,7 +20,7 @@ const socket = require('./socket'); // vidi korak 2
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || origin.startsWith('http://localhost')) {
+        if (!origin || origin.startsWith('http://localhost') || origin.startsWith(`${process.env.FRONTEND_URL}`)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
