@@ -14,6 +14,7 @@ const locations = ["Klub H20", "Best Venue Hall", "Vintage Bar", "Aurora club", 
 export default function CreateSession() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [location, setLocation] = useState("")
+  const [naziv, setNaziv] = useState("");
 
   return (
     <div className="flex flex-col items-center p-6 min-h-screen bg-[#0B132B] text-white">
@@ -38,8 +39,13 @@ export default function CreateSession() {
       <Card className="w-full max-w-md mt-10 bg-[#1C2541] shadow-lg border border-[#3A506B]">
         <span className="text-white">Upiši naziv sesije(Event-a)</span>
         <CardContent className="p-6 space-y-4">
-          <Input placeholder="Naziv Event-a" className="w-full bg-[#3A506B] border border-[#5BC0BE] text-white" />
-          <Popover>
+        <Input
+          placeholder="Naziv Event-a"
+          value={naziv}
+          onChange={(e) => setNaziv(e.target.value)}
+          className="w-full bg-[#3A506B] border border-[#5BC0BE] text-white"
+        />          
+        <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"

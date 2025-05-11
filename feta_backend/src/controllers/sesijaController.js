@@ -3,7 +3,7 @@ const Sesija = require('../models/sesija');
 const { Op } = require('sequelize');
 
 async function createSesija(req, res) {
-    const { dj_id, lokacija_id, minimal_price, comentary, queue_max_song_count, list_bool, list_link } = req.body;
+    const { dj_id, lokacija_id, minimal_price, comentary, queue_max_song_count, list_bool, list_link, naziv } = req.body;
 
     // Provjera obaveznih polja
     if (!dj_id || !lokacija_id || minimal_price === undefined) {
