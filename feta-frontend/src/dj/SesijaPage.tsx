@@ -58,7 +58,6 @@ export default function SesijaPage() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null)
   const navigate = useNavigate()
-  const [activeFilters, setActiveFilters] = useState<Set<"pending" | "approved" | "played" | "rejected">>(new Set());
 
   // Function to fetch session data
   const fetchSession = async () => {

@@ -1,5 +1,5 @@
 import type { Sesija } from "../../types/sesija.tsx"
-import { Clock, DollarSign, MessageSquare } from "lucide-react"
+import { DollarSign, MessageSquare } from "lucide-react"
 
 interface SessionInfoProps {
   sesija: Sesija
