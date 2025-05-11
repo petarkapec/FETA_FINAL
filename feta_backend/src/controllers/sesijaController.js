@@ -25,6 +25,7 @@ async function createSesija(req, res) {
             status: 'active', // Postavi status na 'active',
             list_link,
             list_bool: false,
+            naziv,
         });
 
         res.status(201).json(novaSesija);

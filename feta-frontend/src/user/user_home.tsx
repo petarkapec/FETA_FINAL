@@ -50,8 +50,8 @@ const UserHome = () => {
     }
   }
 
-  // Function to check active session
-  const checkActiveSession = async () => {
+  // Function to check active event
+  const checkActiveEvent = async () => {
     try {
       const djData = localStorage.getItem("dj")
       if (!djData) return
@@ -62,13 +62,13 @@ const UserHome = () => {
       if (response.ok) {
         const data = await response.json()
         if (data && data.sesija_id) {
-          // Redirect to SesijaPage with the active session ID
+          // Redirect to SesijaPage with the active event ID
           navigate(`/sesijapage/${data.sesija_id}`)
           return
         }
       }
     } catch (error) {
-      console.error("Error checking active session:", error)
+      console.error("Error checking active event:", error)
     }
   }
 
@@ -82,8 +82,8 @@ const UserHome = () => {
       return
     }
 
-    // Check for active session
-    checkActiveSession()
+    // Check for active event
+    checkActiveEvent()
 
     // Fetch locations
     fetchLocations()
@@ -104,7 +104,7 @@ const UserHome = () => {
       console.log("Received refresh data:", data)
 
       if (data.type === "session_update") {
-        checkActiveSession()
+        checkActiveEvent()
       }
 
       if (data.type === "location_update") {
@@ -138,14 +138,14 @@ const UserHome = () => {
     setLocationPopoverOpen(false)
   }
 
-  const handleCreateSession = async () => {
+  const handleCreateEvent = async () => {
     if (!selectedLocation) {
       setError("Please select a location")
       return
     }
 
     if (!naziv.trim()) {
-      setError("Please enter a session name")
+      setError("Please enter an event name")
       return
     }
 
@@ -166,7 +166,7 @@ const UserHome = () => {
       const expirationDate = new Date(now.getTime() + Number.parseInt(expirationHours) * 60 * 60 * 1000)
 
       // Use default values for extended fields if not shown
-      const sessionData = {
+      const eventData = {
         dj_id: dj.dj_id,
         lokacija_id: selectedLocation.lokacija_id,
         minimal_price: Number.parseInt(minimalPrice),
@@ -175,29 +175,53 @@ const UserHome = () => {
         expiration: showExtended
           ? expirationDate.toISOString()
           : new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-        naziv: naziv,
+        naziv: naziv.trim(), // Just the trimmed value
         status: "active",
         list_link: showExtended ? listLink || null : null,
         list_bool: showExtended ? listBool : false,
       }
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/sesije/novasesija`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sessionData),
-      })
+      // Add more detailed logging
+      console.log("Creating event with data:", JSON.stringify(eventData, null, 2))
 
-      if (!response.ok) {
-        throw new Error("Failed to create session")
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/sesije/novasesija`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(eventData),
+        })
+
+        // Log the raw response
+        const responseText = await response.text()
+        console.log("Raw server response:", responseText)
+
+        // Try to parse it as JSON if possible
+        let data
+        try {
+          data = JSON.parse(responseText)
+          console.log("Parsed response data:", data)
+        } catch (e) {
+          console.error("Could not parse response as JSON:", e)
+          data = { error: "Could not parse response" }
+        }
+
+        if (!response.ok) {
+          throw new Error(`Failed to create event: ${response.status} ${response.statusText}`)
+        }
+
+        console.log("Event created successfully:", data)
+        navigate(`/sesijapage/${data.sesija_id}`)
+      } catch (err) {
+        console.error("Error creating event:", err)
+        setError("Failed to create event. Please try again.")
+      } finally {
+        setLoading(false)
       }
-
-      const data = await response.json()
-      navigate(`/sesijapage/${data.sesija_id}`)
     } catch (err) {
-      console.error("Error creating session:", err)
-      setError("Failed to create session. Please try again.")
+      console.error("Error creating event:", err)
+      setError("Failed to create event. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -219,18 +243,18 @@ const UserHome = () => {
       <main className="flex-1 flex flex-col items-center justify-center py-8">
         <Card className="w-full max-w-md bg-[#1C2541] shadow-lg border border-[#3A506B]">
           <CardContent className="p-6 space-y-6">
-            <h2 className="text-2xl font-bold text-[#6FFFE9] text-center">Create New Session</h2>
+            <h2 className="text-2xl font-bold text-[#6FFFE9] text-center">Create New Event</h2>
 
             {error && <div className="p-3 bg-red-500/20 border border-red-500 rounded-md text-red-300">{error}</div>}
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="session-name">Session Name</Label>
+                <Label htmlFor="event-name">Event Name</Label>
                 <Input
-                  id="session-name"
+                  id="event-name"
                   value={naziv}
                   onChange={(e) => setNaziv(e.target.value)}
-                  placeholder="Enter session name"
+                  placeholder="Enter event name"
                   className="bg-[#0B132B] border-[#3A506B] text-white"
                 />
               </div>
@@ -250,26 +274,30 @@ const UserHome = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="p-0 w-full bg-[#1C2541] shadow-lg border border-[#3A506B]">
-                    <Command>
+                    <Command className="bg-[#1C2541] border-none rounded-none">
                       <CommandInput
                         placeholder="Search locations..."
                         value={locationSearch}
                         onValueChange={setLocationSearch}
-                        className="text-white bg-[#0B132B]"
+                        className="text-white bg-[#0B132B] border-b border-[#3A506B] focus:ring-0 focus:border-[#5BC0BE]"
                       />
-                      <CommandList className="max-h-60 overflow-auto">
+                      <CommandList className="max-h-60 overflow-auto py-2">
                         {filteredLocations.length === 0 ? (
-                          <p className="p-2 text-center text-sm text-[#5BC0BE]">No locations found</p>
+                          <p className="p-4 text-center text-sm text-[#5BC0BE]">No locations found</p>
                         ) : (
                           filteredLocations.map((location) => (
                             <CommandItem
                               key={location.lokacija_id}
                               onSelect={() => handleLocationSelect(location)}
-                              className="cursor-pointer hover:bg-[#3A506B] text-white"
+                              className="cursor-pointer hover:bg-[#3A506B] text-white px-4 py-2"
                             >
                               <div className="flex flex-col">
-                                <span>{location.naziv_kluba || `Location #${location.lokacija_id}`}</span>
-                                <span className="text-xs text-[#5BC0BE]">{location.adresa}</span>
+                                <span className="font-medium">
+                                  {location.naziv_kluba || `Location #${location.lokacija_id}`}
+                                </span>
+                                <span className="text-xs text-[#5BC0BE]">
+                                  {location.adresa || "No address available"}
+                                </span>
                               </div>
                             </CommandItem>
                           ))
@@ -298,7 +326,7 @@ const UserHome = () => {
                   id="commentary"
                   value={commentary}
                   onChange={(e) => setCommentary(e.target.value)}
-                  placeholder="Add a description for your session"
+                  placeholder="Add a description for your event"
                   className="bg-[#0B132B] border-[#3A506B] text-white"
                   rows={3}
                 />
@@ -329,7 +357,7 @@ const UserHome = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="expiration">Session Duration (hours)</Label>
+                    <Label htmlFor="expiration">Event Duration (hours)</Label>
                     <div className="flex items-center gap-2">
                       <Input
                         id="expiration"
@@ -371,7 +399,7 @@ const UserHome = () => {
               )}
 
               <Button
-                onClick={handleCreateSession}
+                onClick={handleCreateEvent}
                 disabled={loading}
                 className="w-full bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium h-12 mt-4"
               >
@@ -381,7 +409,7 @@ const UserHome = () => {
                     Creating...
                   </div>
                 ) : (
-                  "Start Session"
+                  "Start Event"
                 )}
               </Button>
             </div>

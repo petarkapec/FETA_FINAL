@@ -2,11 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, MapPin, Music, Calendar } from "lucide-react"
+import { Search, MapPin } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import type { Lokacija } from "@/types/lokacija"
 import socket from "../utils/socket"
+
+// Define the Session type
+type Session = {
+  sesija_id: number
+  status: string
+  naziv?: string
+}
 
 const LocationsView = () => {
   const [locations, setLocations] = useState<Lokacija[]>([])
@@ -15,6 +22,7 @@ const LocationsView = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+  const [activeSessions, setActiveSessions] = useState<Record<number, any>>({})
 
   // Function to fetch locations
   const fetchLocations = async () => {
@@ -37,10 +45,44 @@ const LocationsView = () => {
     }
   }
 
+  // Function to fetch active sessions for all locations
+  const fetchActiveSessions = async () => {
+    try {
+      const sessionsMap: Record<number, any> = {}
+
+      // Fetch active sessions for each location
+      const promises = locations.map(async (location) => {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/sesije/sesije-lokacija/${location.lokacija_id}`,
+        )
+
+        if (response.ok) {
+          const sessions = await response.json()
+          if (sessions && sessions.length > 0) {
+            // Store the first active session for this location
+            sessionsMap[location.lokacija_id] = sessions.find((s: Session) => s.status === "active") || null
+          }
+        }
+      })
+
+      await Promise.all(promises)
+      setActiveSessions(sessionsMap)
+    } catch (error) {
+      console.error("Error fetching active sessions:", error)
+    }
+  }
+
   // Initial data fetch
   useEffect(() => {
     fetchLocations()
   }, [])
+
+  // Add a new useEffect to fetch sessions when locations change
+  useEffect(() => {
+    if (locations.length > 0) {
+      fetchActiveSessions()
+    }
+  }, [locations])
 
   // Set up WebSocket for real-time updates
   useEffect(() => {
@@ -100,6 +142,16 @@ const LocationsView = () => {
     }
   }
 
+  // Sort locations to show those with active events first
+  const sortedLocations = [...filteredLocations].sort((a, b) => {
+    const aHasActiveSession = !!activeSessions[a.lokacija_id]
+    const bHasActiveSession = !!activeSessions[b.lokacija_id]
+
+    if (aHasActiveSession && !bHasActiveSession) return -1
+    if (!aHasActiveSession && bHasActiveSession) return 1
+    return 0
+  })
+
   return (
     <div className="flex flex-col min-h-screen bg-[#0B132B] text-white p-4">
       <header className="p-4 flex justify-center border-b border-[#3A506B]">
@@ -130,45 +182,68 @@ const LocationsView = () => {
           <div className="text-center p-8 text-[#5BC0BE]">No locations found</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            {filteredLocations.map((location) => (
-              <div
-                key={location.lokacija_id}
-                onClick={() => handleLocationClick(location.lokacija_id)}
-                className="bg-[#1C2541] rounded-xl overflow-hidden shadow-lg border border-[#3A506B] cursor-pointer hover:border-[#5BC0BE] transition-all"
-              >
-                <div className="h-48 bg-[#3A506B] relative">
-                  <img
-                    src={location.profil_slika_link || "/placeholder.svg?height=200&width=400"}
-                    alt={location.naziv_kluba || "Club"}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0B132B] to-transparent p-4">
-                    <h3 className="text-xl font-bold text-white">
+            {sortedLocations.map((location) => {
+              const hasActiveSession = !!activeSessions[location.lokacija_id]
+              const activeSession = activeSessions[location.lokacija_id]
+
+              return (
+                <div
+                  key={location.lokacija_id}
+                  className="bg-[#1C2541] rounded-xl overflow-hidden shadow-lg border border-[#3A506B] hover:border-[#5BC0BE] transition-all"
+                >
+                  <div className="h-48 bg-[#3A506B] relative">
+                    <img
+                      src={location.profil_slika_link || "/placeholder.svg?height=200&width=400"}
+                      alt={location.naziv_kluba || "Club"}
+                      className={`w-full h-full object-cover ${!hasActiveSession ? "grayscale" : ""}`}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-xl font-bold text-white mb-1">
                       {location.naziv_kluba || `Club #${location.lokacija_id}`}
                     </h3>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center text-[#5BC0BE] mb-2">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span className="text-sm">{location.adresa || "Address not available"}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-[#5BC0BE]">
-                      <Music className="h-4 w-4 mr-1" />
-                      <Calendar className="h-4 w-4 ml-2" />
+
+                    <div className="mb-2">
+                      {hasActiveSession ? (
+                        <p className="text-[#6FFFE9] font-medium">{activeSession.naziv || "Active Event"}</p>
+                      ) : (
+                        <p className="text-gray-400 italic">No active events at this time</p>
+                      )}
                     </div>
-                    <Button className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium">View Events</Button>
+
+                    <div className="flex items-center text-[#5BC0BE] mb-3">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span className="text-sm">{location.adresa || "Address not available"}</span>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => hasActiveSession && handleLocationClick(location.lokacija_id)}
+                        className={`${
+                          hasActiveSession
+                            ? "bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B]"
+                            : "bg-gray-500 cursor-not-allowed"
+                        } font-medium`}
+                        disabled={!hasActiveSession}
+                      >
+                        Order a song!
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </main>
 
-      <footer className="p-4 border-t border-[#3A506B] text-center text-sm text-[#5BC0BE]">
-        Find the best music events in your area
+      <footer className="p-4 border-t border-[#3A506B] text-center">
+        <div className="flex justify-center">
+          <Button onClick={() => navigate("/nickform")} className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white">
+            Logout
+          </Button>
+        </div>
+        <p className="text-sm text-[#5BC0BE] mt-2">Find the best music events in your area</p>
       </footer>
     </div>
   )

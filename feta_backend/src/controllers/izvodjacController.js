@@ -9,8 +9,6 @@ const getAll = async (req, res) => {
     }
 };
 
-
-
 const create = async (req, res) => {
     try {
         const newIzvodjac = await izvodjacService.create(req.body);
@@ -33,8 +31,26 @@ const getIzvodjacById = async (req, res) => {
     }
 }
 
+const updateIzvodjac = async (req, res) => {
+    try {
+        const { dj_id } = req.params; // ID izvođača iz URL-a
+        const updatedData = req.body; // Podaci za ažuriranje iz tijela zahtjeva
+
+        const updatedIzvodjac = await izvodjacService.updateIzvodjac(dj_id, updatedData);
+
+        if (!updatedIzvodjac) {
+            return res.status(404).json({ message: "Izvođač nije pronađen." });
+        }
+
+        res.json(updatedIzvodjac);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 module.exports = {
     getAll,
     create,
     getIzvodjacById,
+    updateIzvodjac, // Dodano
 };

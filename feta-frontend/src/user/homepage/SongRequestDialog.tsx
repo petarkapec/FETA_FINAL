@@ -11,7 +11,7 @@ import type { Song } from "../../types/song"
 import { Slider } from "@/components/ui/slider"
 import { useState } from "react"
 import { RequestConfirmationCard } from "./RequestConfirmationCard"
-import { DollarSign } from "lucide-react"
+import { EuroIcon } from "lucide-react"
 
 interface SongRequestDialogProps {
   sesija_id: number
@@ -113,17 +113,21 @@ export const SongRequestDialog = ({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-sm text-white">Donation amount (€)</Label>
-              <Slider
+              <Label className="text-sm text-white">Donation amount </Label>
+              <input
+                type="range"
                 min={minCijena}
                 max={maxCijena}
                 step={1}
-                value={[Math.min(Number(donacija) || minCijena, maxCijena)]}
-                onValueChange={(value) => setDonacija(value[0].toString())}
-                className="mb-1 [&_[role=slider]]:bg-[#6FFFE9] [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:rounded-full [&_[role=range]]:bg-[#5BC0BE]"
+                value={Number(donacija)}
+                onChange={(e) => setDonacija(e.target.value)}
+                className="w-full h-2 rounded-full appearance-none slider-thumb"
+                style={{
+                  background: `linear-gradient(to right, #6FFFE9 ${(Number(donacija) - minCijena) / (maxCijena - minCijena) * 100}%, #000000 ${(Number(donacija) - minCijena) / (maxCijena - minCijena) * 100}%)`,
+                }}
               />
               <div className="flex items-center">
-                <DollarSign className="h-4 w-4 text-[#5BC0BE] mr-1" />
+                <EuroIcon className="h-4 w-4 text-[#5BC0BE] mr-1" />
                 <Input
                   type="number"
                   value={donacija}

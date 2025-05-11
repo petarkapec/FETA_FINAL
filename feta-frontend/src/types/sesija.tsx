@@ -10,4 +10,7 @@ export type Sesija = {
   status: "active" | "expired" // Added status field
   list_link: string // Added list_link field
   list_bool: boolean // Added list_bool field
+  // Dodana polja za lokaciju
+  location_name?: string; // Opcionalno polje za ime kluba
+  location_address?: string; // Opcionalno polje za adresu
 }

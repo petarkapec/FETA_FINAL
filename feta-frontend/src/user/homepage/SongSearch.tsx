@@ -18,6 +18,9 @@ interface SongSearchProps {
 export const SongSearch = ({ query, results, handleQueryChange, handleSongSelect }: SongSearchProps) => (
   <main className="flex-1 flex flex-col items-center">
     <div className="w-full max-w-md">
+    <div className="mt-6 flex flex-col gap-6">
+    {/* Dodajte `gap-6` ili `mt-6` gdje je potrebno za razmak između elemenata */}
+    </div>
       <form onSubmit={(e) => e.preventDefault()} className="relative mb-8">
         <Input
           type="text"

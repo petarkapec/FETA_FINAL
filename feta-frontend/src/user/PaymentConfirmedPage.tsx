@@ -37,7 +37,7 @@ export const PaymentConfirmedPage = () => {
         <div className="flex justify-center mb-4">
           <CheckCircle className="h-16 w-16 text-green-500" />
         </div>
-        <h1 className="text-2xl font-bold text-[#6FFFE9] mb-4">Uplata zaprimljena ✅</h1>
+        <h1 className="text-2xl font-bold text-[#6FFFE9] mb-4">Uplata zaprimljena</h1>
         <p className="text-[#5BC0BE] mb-6">
           Hvala na uplati! Tvoj zahtjev za pjesmu je uspješno zabilježen i čeka obradu DJ-a.
         </p>
@@ -46,7 +46,7 @@ export const PaymentConfirmedPage = () => {
           className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-semibold w-full"
           onClick={handleBackToSession}
         >
-          Natrag na sesiju
+          Natrag na event
         </Button>
       </div>
     </div>

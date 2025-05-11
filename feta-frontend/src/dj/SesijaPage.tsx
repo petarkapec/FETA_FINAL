@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { Clock, DollarSign, CheckCircle, XCircle, Filter, ArrowUpDown, Music } from "lucide-react"
+import { Clock, DollarSign, CheckCircle, XCircle, Filter, ArrowUpDown, Music, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -29,7 +29,7 @@ interface Order {
   song_name: string
   song_artist: string
   song_album_art: string
-  status: "pending" | "allowed" | "played" | "rejected"
+  status: "pending" | "approved" | "played" | "rejected"
   created_at: string
 }
 
@@ -49,7 +49,7 @@ export default function SesijaPage() {
   const { sesija_id } = useParams<{ sesija_id: string }>()
   const [session, setSession] = useState<Session | null>(null)
   const [requests, setRequests] = useState<Order[]>([])
-  const [activeFilter, setActiveFilter] = useState<"all" | "pending" | "allowed" | "played" | "rejected">("all")
+  const [activeFilter, setActiveFilter] = useState<"all" | "pending" | "approved" | "played" | "rejected">("all")
   const [sortOrder, setSortOrder] = useState<"time" | "price">("time")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc") // newest first by default
   const [totalEarnings, setTotalEarnings] = useState<number>(0)
@@ -58,6 +58,7 @@ export default function SesijaPage() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null)
   const navigate = useNavigate()
+  const [activeFilters, setActiveFilters] = useState<Set<"pending" | "approved" | "played" | "rejected">>(new Set());
 
   // Function to fetch session data
   const fetchSession = async () => {
@@ -76,15 +77,15 @@ export default function SesijaPage() {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/sesije/${sessionId}`)
 
       if (!response.ok) {
-        throw new Error("Failed to fetch session")
+        throw new Error("Failed to fetch event")
       }
 
       const data: Session = await response.json()
       setSession(data)
       setLoading(false)
     } catch (error) {
-      console.error("Error fetching session:", error)
-      setError("Failed to load session. Please try again later.")
+      console.error("Error fetching event:", error)
+      setError("Failed to load event. Please try again later.")
       setLoading(false)
     }
   }
@@ -195,7 +196,7 @@ export default function SesijaPage() {
 
   const filteredRequests = activeFilter === "all" ? requests : requests.filter((req) => req.status === activeFilter)
 
-  const handleStatusChange = async (id: number, newStatus: "allowed" | "played" | "rejected") => {
+  const handleStatusChange = async (id: number, newStatus: "approved" | "played" | "rejected") => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/narudzbe/${id}/status`, {
         method: "PUT",
@@ -228,7 +229,7 @@ export default function SesijaPage() {
       console.error("Error updating status:", error)
     }
 
-    if (newStatus === "allowed") {
+    if (newStatus === "approved") {
       try {
         const captureResp = await fetch(`${import.meta.env.VITE_BACKEND_URL}/narudzbe/${id}/capture`, {
           method: "POST",
@@ -268,6 +269,7 @@ export default function SesijaPage() {
       <div className="flex flex-col min-h-screen bg-[#0B132B] text-white p-4">
         <header className="p-4 flex justify-between items-center border-b border-[#3A506B]">
           <Button onClick={() => navigate("/user_home")} className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white">
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
           <h1 className="text-4xl font-bold text-[#6FFFE9]">FETA</h1>
@@ -276,12 +278,12 @@ export default function SesijaPage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="p-6 bg-[#1C2541] rounded-lg border border-[#3A506B] max-w-md">
             <h2 className="text-xl text-[#6FFFE9] mb-4">Error</h2>
-            <p className="text-red-300">{error || "Session not found"}</p>
+            <p className="text-red-300">{error || "Event not found"}</p>
             <Button
               onClick={() => navigate("/user_home")}
               className="mt-4 bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B]"
             >
-              Create New Session
+              Create New Event
             </Button>
           </div>
         </div>
@@ -292,20 +294,10 @@ export default function SesijaPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#0B132B] text-white">
       <header className="p-4 flex justify-between items-center border-b border-[#3A506B]">
-        <Button onClick={() => navigate("/user_home")} className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white">
-          Back
-        </Button>
         <h1 className="text-2xl font-bold text-[#6FFFE9]">{session.naziv}</h1>
         <div className="flex items-center gap-2">
           <Button className="bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-2 px-4 rounded-lg">
             Balance: {totalEarnings.toFixed(2)} €
-          </Button>
-          <Button
-            onClick={refreshAllData}
-            className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white"
-            title={`Last refresh: ${formatTimeAgo(lastRefresh)}`}
-          >
-            <Clock className="h-4 w-4" />
           </Button>
         </div>
       </header>
@@ -337,7 +329,7 @@ export default function SesijaPage() {
           {/* Status filter */}
           <div className="flex items-center gap-2">
             <span className="text-[#5BC0BE]">Status:</span>
-            {(["all", "pending", "allowed", "played", "rejected"] as const).map((filter) => (
+            {(["all", "pending", "approved", "played", "rejected"] as const).map((filter) => (
               <Button
                 key={filter}
                 variant={activeFilter === filter ? "default" : "outline"}
@@ -348,8 +340,8 @@ export default function SesijaPage() {
                   ? "All"
                   : filter === "pending"
                     ? "Pending"
-                    : filter === "allowed"
-                      ? "Allowed"
+                    : filter === "approved"
+                      ? "Approved"
                       : filter === "played"
                         ? "Played"
                         : "Rejected"}
@@ -421,7 +413,7 @@ export default function SesijaPage() {
                           className={
                             request.status === "pending"
                               ? "bg-yellow-500 text-black"
-                              : request.status === "allowed"
+                              : request.status === "approved"
                                 ? "bg-blue-500"
                                 : request.status === "played"
                                   ? "bg-green-500"
@@ -460,7 +452,7 @@ export default function SesijaPage() {
                     <>
                       <Button
                         size="sm"
-                        onClick={() => handleStatusChange(request.narudzba_id, "allowed")}
+                        onClick={() => handleStatusChange(request.narudzba_id, "approved")}
                         className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B]"
                       >
                         Approve
@@ -476,7 +468,7 @@ export default function SesijaPage() {
                     </>
                   )}
 
-                  {request.status === "allowed" && (
+                  {request.status === "approved" && (
                     <Button
                       size="sm"
                       onClick={() => handleStatusChange(request.narudzba_id, "played")}
@@ -505,14 +497,14 @@ export default function SesijaPage() {
               })
 
               if (response.ok) {
-                alert("Session successfully ended")
+                alert("Event successfully ended")
                 navigate("/user_home")
               } else {
-                alert("Failed to end session. Please try again.")
+                alert("Failed to end event. Please try again.")
               }
             } catch (error) {
-              console.error("Error ending session:", error)
-              alert("Error ending session. Please try again.")
+              console.error("Error ending event:", error)
+              alert("Error ending event. Please try again.")
             }
           }}
           className="w-full bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-bold"

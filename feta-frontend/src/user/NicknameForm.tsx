@@ -6,13 +6,15 @@ import { useState } from "react"
 import { api } from "../API.ts"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Loader2, Music } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 const NicknameForm = () => {
   const [nickname, setNickname] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +35,10 @@ const NicknameForm = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleDjRedirect = () => {
+    navigate("/login")
   }
 
   return (
@@ -72,6 +78,17 @@ const NicknameForm = () => {
             </Button>
           </form>
         </CardContent>
+        <CardFooter className="flex flex-col">
+          <div className="w-full border-t border-[#3A506B] my-4"></div>
+          <Button
+            type="button"
+            onClick={handleDjRedirect}
+            className="w-full bg-[#3A506B] hover:bg-[#5BC0BE] text-white flex items-center justify-center gap-2"
+          >
+            <Music className="h-4 w-4" />
+            I'm a DJ
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   )

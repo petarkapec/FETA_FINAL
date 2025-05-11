@@ -49,26 +49,76 @@ export const DJProfile = ({ ime, profilnaSlika, instagram }: DJProfileProps) => 
       className="w-48 h-48 rounded-full object-cover border-4 border-[#6FFFE9]"
     />
     <h2 className="text-2xl font-bold text-white mt-4">DJ {ime}</h2>
-    {instagram && <p className="text-[#6FFFE9] mt-2">@{instagram}</p>}
+    {instagram && (
+      <a
+        href={`https://instagram.com/${instagram}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[#6FFFE9] mt-2 flex items-center gap-1 hover:underline"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-instagram"
+        >
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+        </svg>
+        {instagram}
+      </a>
+    )}
   </div>
 )
 
 interface ClubProfileProps {
-  nazivKluba?: string
+  naziv_kluba?: string
   profilnaSlika?: string
   instagram?: string
   aboutus?: string
 }
 
-export const ClubProfile = ({ nazivKluba, profilnaSlika, instagram}: ClubProfileProps) => (
+export const ClubProfile = ({ naziv_kluba, profilnaSlika, instagram}: ClubProfileProps) => (
   <div className="flex flex-col items-center bg-[#1B2B4A] p-6 rounded-2xl shadow-md">
     <img
       src={profilnaSlika || "/placeholder.svg"}
       alt="Club Profile"
       className="w-48 h-48 rounded-full object-cover border-4 border-[#6FFFE9]"
     />
-    <h2 className="text-2xl font-bold text-white mt-4">{nazivKluba || "Unknown club"}</h2>
-    {instagram && <p className="text-[#6FFFE9] mt-2">@{instagram}</p>}
+    <h2 className="text-2xl font-bold text-white mt-4">{naziv_kluba || "Unknown club"}</h2>
+    {instagram && (
+      <a
+        href={`https://instagram.com/${instagram}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[#6FFFE9] mt-2 flex items-center gap-1 hover:underline"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-instagram"
+        >
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 16 11.37z"></path>
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+        </svg>
+        {instagram}
+      </a>
+    )}
   </div>
 )
 
@@ -84,7 +134,7 @@ interface UserOrder {
   song_name: string
   song_artist: string
   song_album_art: string
-  status: "pending" | "allowed" | "played" | "rejected"
+  status: "pending" | "approved" | "played" | "rejected"
   created_at: string
 }
 
@@ -115,6 +165,7 @@ const SpotifySearch = () => {
   const [error, setError] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<"time" | "price">("time") // Default sort by time
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc") // Newest first by default
+const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -382,7 +433,9 @@ const SpotifySearch = () => {
   }
 
   // Sort user orders based on current sort settings
-  const sortedUserOrders = [...userOrders].sort((a, b) => {
+  const sortedUserOrders = [...userOrders]
+  .filter((order) => order.sesija_id === sesija?.sesija_id) // Filtriraj samo requestove za trenutni event
+  .sort((a, b) => {
     if (sortOrder === "time") {
       const timeA = new Date(a.created_at).getTime()
       const timeB = new Date(b.created_at).getTime()
@@ -533,7 +586,7 @@ const SpotifySearch = () => {
         className="mb-6 bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium"
       >
         <ArrowLeft className="w-6 h-6 mr-2" />
-        Back to session
+        Back to event
       </Button>
 
       <div className="w-full bg-[#1C2541] rounded-xl p-6 shadow-lg">
@@ -580,8 +633,8 @@ const SpotifySearch = () => {
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5BC0BE]"></div>
           </div>
-        ) : userOrders.length === 0 ? (
-          <p className="text-center py-8 text-[#5BC0BE]">You haven't made any song requests yet.</p>
+        ) : sortedUserOrders.length === 0 ? (
+          <p className="text-center py-8 text-[#5BC0BE]">There are no song requests for this session yet.</p>
         ) : (
           <div className="space-y-4">
             {sortedUserOrders.map((order) => (
@@ -638,7 +691,7 @@ const SpotifySearch = () => {
               className="mb-6 bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium"
             >
               <ArrowLeft className="w-6 h-6 mr-2" />
-              Back to session
+              Back to event
             </Button>
             <DJProfile ime={dj?.ime || ""} profilnaSlika={dj?.profilna_slika} instagram={dj?.instagram} />
           </div>
@@ -651,10 +704,10 @@ const SpotifySearch = () => {
               className="mb-6 bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium"
             >
               <ArrowLeft className="w-6 h-6 mr-2" />
-              Back to session
+              Back to event
             </Button>
             <ClubProfile
-              nazivKluba={klub?.naziv_kluba}
+              naziv_kluba={klub?.naziv_kluba}
               profilnaSlika={klub?.profil_slika_link}
               instagram={klub?.instagram}
             />
@@ -670,13 +723,20 @@ const SpotifySearch = () => {
   return (
     <div className="flex flex-col min-h-screen bg-[#0B132B] text-white p-4 relative">
       <div>
-        <div className="absolute top-4 left-4 flex items-center space-x-2 text-[#6FFFE9]">
+        <div className="absolute top-4 flex items-center justify-between w-full px-4 text-[#6FFFE9]">
           <Button
             onClick={() => setActiveView("dj")}
             className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium"
           >
             <Headphones className="w-6 h-6" />
             <span className="text-lg font-semibold">{dj?.ime || "DJ"}</span>
+          </Button>
+          <Button
+            onClick={() => setActiveView("club")}
+            className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium"
+          >
+            <MapPin className="w-6 h-6" />
+            <span className="text-lg font-semibold">{klub?.naziv_kluba || "Club"}</span>
           </Button>
         </div>
         <div className="text-center">
@@ -691,24 +751,52 @@ const SpotifySearch = () => {
               <Music className="w-4 h-4 mr-2" />
               My Requests
             </Button>
-            <Button onClick={handleLogout} className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white">
-              Logout
-            </Button>
+
           </div>
         </div>
-        <div className="absolute top-4 right-4 flex items-center space-x-2 text-[#6FFFE9]">
-          <Button
-            onClick={() => setActiveView("club")}
-            className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium"
-          >
-            <MapPin className="w-6 h-6" />
-            <span className="text-lg font-semibold">{klub?.naziv_kluba || "Club"}</span>
-          </Button>
+        <div className="mt-6 flex flex-col gap-6">
+           {/* Dodajte `gap-6` ili `mt-6` gdje je potrebno za razmak između elemenata */}
         </div>
       </div>
 
       {renderProfileView()}
-      <Footer />
+
+      <footer className="p-4 border-t border-[#3A506B] text-center">
+        <div className="flex justify-center gap-4">
+          <Button onClick={handleLogout} className="bg-[#3A506B] hover:bg-[#5BC0BE] text-white">
+            Logout
+          </Button>
+          <Button
+            onClick={() => setIsHelpOpen(true)}
+            className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium"
+          >
+            Help
+          </Button>
+        </div>
+      </footer>
+
+      {isHelpOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#1C2541] text-white p-6 rounded-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold text-[#6FFFE9] mb-4">How to Use</h2>
+            <p className="mb-4">
+              Welcome to FETA! Here are some basic instructions:
+            </p>
+            <ul className="list-disc list-inside mb-4">
+              <li>Search for your favorite songs using the search bar.</li>
+              <li>Click on a song to request it.</li>
+              <li>Set a donation amount and add a comment if needed.</li>
+              <li>Submit your request and enjoy the music!</li>
+            </ul>
+            <Button
+              onClick={() => setIsHelpOpen(false)}
+              className="bg-[#5BC0BE] hover:bg-[#6FFFE9] text-[#0B132B] font-medium w-full"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
